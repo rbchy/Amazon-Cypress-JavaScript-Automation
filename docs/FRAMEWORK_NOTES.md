@@ -1,3 +1,5 @@
+> **Note:** historical notes from the first version of this framework. Some file names and counts here are out of date. The [main README](../README.md) describes the current code.
+
 # Amazon Automation - Cypress + JavaScript BDD Framework
 
 Complete test automation framework for Amazon e-commerce workflows using Cypress, JavaScript, and Cucumber BDD.

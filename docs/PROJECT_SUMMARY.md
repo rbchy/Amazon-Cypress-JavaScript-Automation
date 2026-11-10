@@ -1,3 +1,5 @@
+> **Note:** historical notes from the first version of this framework. Some file names and counts here are out of date. The [main README](../README.md) describes the current code.
+
 # 📦 Amazon Automation - Complete Project Deliverables
 
 ## ✅ What's Included
