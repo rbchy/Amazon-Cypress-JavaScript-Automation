@@ -20,9 +20,9 @@ report.generate({
   jsonDir,
   reportPath: path.join(__dirname, "../cypress/results/cucumber-html-report"),
   metadata: {
-    browser: { name: "chrome", version: "latest" },
-    device: "Local Machine",
-    platform: { name: "macOS" },
+    browser: { name: process.env.BROWSER || "chrome", version: "latest" },
+    device: process.env.CI ? "GitHub Actions runner" : "Local Machine",
+    platform: { name: { darwin: "osx", win32: "windows", linux: "linux" }[process.platform] || process.platform },
   },
   customData: {
     title: "Amazon Automation – Test Run Info",

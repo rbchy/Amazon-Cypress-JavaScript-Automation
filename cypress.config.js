@@ -25,7 +25,6 @@ module.exports = defineConfig({
     screenshotsFolder: "cypress/screenshots",
     videosFolder: "cypress/videos",
     video: false,
-    allowCypressEnv: true,
 
     async setupNodeEvents(on, config) {
       await addCucumberPreprocessorPlugin(on, config);

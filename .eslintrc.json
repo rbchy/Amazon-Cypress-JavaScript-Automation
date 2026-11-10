@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "env": { "es2022": true, "node": true, "browser": true },
+  "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
+  "plugins": ["cypress"],
+  "extends": ["eslint:recommended", "plugin:cypress/recommended", "prettier"],
+  "rules": {
+    "cypress/no-unnecessary-waiting": "error",
+    "cypress/unsafe-to-chain-command": "off",
+    "no-unused-vars": ["error", { "args": "none" }]
+  }
+}

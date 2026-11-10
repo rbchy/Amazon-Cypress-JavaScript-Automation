@@ -3,6 +3,10 @@ node_modules/
 cypress/results/
 cypress/screenshots/
 cypress/videos/
+cypress/downloads/
 *.pdf
 *.report
 .DS_Store
+.claude/
+.project
+.settings/

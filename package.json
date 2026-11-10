@@ -28,9 +28,9 @@
     "test:cucumber-report": "cypress run && node scripts/generate-report.js",
     "test:debug": "cypress run --headed --no-exit",
     "test:ci": "cypress run --headless --browser chrome",
-    "lint": "eslint cypress/support/step_definitions/*.js",
+    "lint": "eslint cypress scripts cypress.config.js",
     "format": "prettier --write \"cypress/**/*.js\"",
-    "clean": "rm -rf cypress/results cypress/screenshots cypress/videos node_modules",
+    "clean": "rm -rf cypress/results cypress/screenshots cypress/videos",
     "setup": "npm install && echo '✅ Setup complete!'"
   },
   "cypress-cucumber-preprocessor": {

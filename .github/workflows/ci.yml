@@ -1,0 +1,91 @@
+# Amazon Cypress BDD — CI
+#   lint : ESLint (eslint-plugin-cypress) on step definitions, support and scripts
+#   e2e  : all 39 Cucumber scenarios on Chrome, Firefox and Edge (headless),
+#          then the multiple-cucumber-html-reporter dashboard as an artifact
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: "0"   # lint does not need the Cypress app
+      - run: npm run lint
+
+  e2e:
+    name: Cucumber scenarios (${{ matrix.browser }})
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox, edge]
+    env:
+      BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Run Cypress + Cucumber
+        uses: cypress-io/github-action@v6
+        with:
+          browser: ${{ matrix.browser }}
+          config: retries=0          # CI must show real failures, no silent retry
+
+      - name: Cucumber HTML dashboard
+        if: always()
+        run: node scripts/generate-report.js || true
+
+      - name: Scenario summary
+        if: always()
+        run: |
+          node -e '
+            const fs = require("fs");
+            const f = "cypress/results/cucumber-json/cucumber-report.json";
+            if (!fs.existsSync(f)) { console.log("no cucumber json"); process.exit(0); }
+            const feats = JSON.parse(fs.readFileSync(f, "utf8"));
+            let rows = ["| Feature | Scenarios | Passed | Failed |", "|---|---:|---:|---:|"], P = 0, F = 0;
+            for (const ft of feats) {
+              let p = 0, x = 0;
+              for (const sc of ft.elements || []) {
+                const st = sc.steps.map(s => s.result.status);
+                st.every(s => s === "passed") ? p++ : x++;
+              }
+              P += p; F += x; rows.push(`| ${ft.name} | ${p + x} | ${p} | ${x} |`);
+            }
+            rows.push(`| **Total (${process.env.BROWSER})** | **${P + F}** | **${P}** | **${F}** |`);
+            const out = rows.join("\n");
+            console.log(out);
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + "\n");
+          '
+
+      - name: Upload reports and failure screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-reports-${{ matrix.browser }}
+          path: |
+            cypress/results
+            cypress/screenshots
+          if-no-files-found: ignore

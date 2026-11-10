@@ -36,7 +36,6 @@ When("I click on Create Account link", () => {
   cy.contains(/create your amazon account|create account/i, { timeout: 12000 })
     .should("be.visible")
     .click();
-  cy.wait(500);
 });
 
 When("I enter email {string}", (email) => {
@@ -63,7 +62,6 @@ When("I confirm password {string}", (password) => {
 
 When("I click Create Account button", () => {
   cy.get(selectors.create_account_button).first().click();
-  cy.wait(1000);
 });
 
 Then("I should see account created message", () => {
@@ -93,7 +91,9 @@ Then("I should see dashboard", () => {
 });
 
 Then("I should see account menu with my email", () => {
-  cy.get(selectors.account_menu).first().should("exist");
+  // signed-in greeting replaces "Hello, Sign in"
+  cy.get(selectors.account_menu).first().should("be.visible")
+    .and("contain", "Hello, Test User").and("not.contain", "Sign in");
 });
 
 Then("I should remain on login page", () => {
@@ -101,7 +101,7 @@ Then("I should remain on login page", () => {
 });
 
 Then("I should see error message {string}", (errorMsg) => {
-  cy.get(selectors.error_message, { timeout: 12000 }).should("be.visible");
+  cy.get(selectors.error_message, { timeout: 12000 }).should("be.visible").and("contain", errorMsg);
 });
 
 // ─── Logout Steps ──────────────────────────────────────────────────────────

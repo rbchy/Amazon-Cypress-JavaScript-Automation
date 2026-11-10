@@ -1,4 +1,6 @@
 // cypress/support/e2e.js
+import { resetShop, registerShopIntercepts } from "./mock-shop";
+import { registerAccountIntercepts } from "./mock-account";
 // All Amazon pages are stubbed so tests run without real network access.
 
 Cypress.on("uncaught:exception", () => false);
@@ -8,7 +10,7 @@ Cypress.on("uncaught:exception", () => false);
 const NAV = `
   <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
   <a href="/ap/signin" data-nav-role="signin" id="nav-link-accountList">Hello, Sign in Account &amp; Lists</a>
-  <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">1</span></a>
+  <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">0</span></a>
   <a href="/gp/flex/sign-out.html">Sign Out</a>
 `;
 
@@ -44,7 +46,7 @@ const LOGGED_IN_HOME_HTML = `<!DOCTYPE html><html><head><title>Amazon</title></h
   <nav id="navbar">
     <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
     <a href="/gp/account" data-nav-role="signin" id="nav-link-accountList">Hello, Test User Account &amp; Lists</a>
-    <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">1</span></a>
+    <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">0</span></a>
     <a href="/gp/flex/sign-out.html">Sign Out</a>
   </nav>
   <form action="/s" method="get">
@@ -95,200 +97,8 @@ const REG_ERROR_HTML = (msg) => `<!DOCTYPE html><html><head><title>Registration 
   <input id="continue" type="submit" />
 </body></html>`;
 
-const SEARCH_HTML = `<!DOCTYPE html><html><head><title>Search Results</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-    <a href="/gp/account" data-nav-role="signin">Hello, Test User</a>
-    <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">1</span></a>
-    <a href="/gp/flex/sign-out.html">Sign Out</a>
-  </nav>
-  <form action="/s" method="get">
-    <input id="twotabsearchtextbox" name="k" type="text" />
-    <button id="nav-search-submit-button" type="submit">Go</button>
-  </form>
-  <div id="s-result-count" data-component-type="s-result-info-bar">1-48 of over 10,000 results</div>
-  <select id="s-result-sort-select">
-    <option value="relevanceblender">Featured</option>
-    <option value="price-asc-rank">Price: Low to High</option>
-    <option value="review-rank">Highest Rating</option>
-    <option value="date-desc-rank">Newest</option>
-  </select>
-  <div data-component-type="s-search-result" class="s-result-item">
-    <h2><a href="/dp/B001" class="a-link-normal"><span>Dell Laptop 15-inch Pro</span></a></h2>
-    <span class="a-price"><span class="a-offscreen">$799.99</span><span class="a-price-whole">799</span></span>
-    <i class="a-icon-star a-star-4-5"><span class="a-icon-alt">4.5 out of 5 stars</span></i>
-    <img class="s-image" src="/img/laptop.jpg" alt="Dell Laptop" />
-    <span class="a-size-base-plus a-color-base">Dell</span>
-    <span class="a-color-base">Out of Stock</span>
-    <button disabled>Add to Cart</button>
-    <button>Notify Me</button>
-  </div>
-  <div data-component-type="s-search-result" class="s-result-item">
-    <h2><a href="/dp/B002" class="a-link-normal"><span>Logitech Mouse M705</span></a></h2>
-    <span class="a-price"><span class="a-offscreen">$34.99</span><span class="a-price-whole">34</span></span>
-    <i class="a-icon-star a-star-4"><span class="a-icon-alt">4.0 out of 5 stars</span></i>
-    <img class="s-image" src="/img/mouse.jpg" alt="Mouse" />
-    <span class="a-size-base-plus a-color-base">Dell</span>
-  </div>
-  <div data-component-type="s-search-result" class="s-result-item">
-    <h2><a href="/dp/B003" class="a-link-normal"><span>Mechanical Keyboard</span></a></h2>
-    <span class="a-price"><span class="a-offscreen">$79.99</span><span class="a-price-whole">79</span></span>
-    <i class="a-icon-star a-star-4"><span class="a-icon-alt">4.2 out of 5 stars</span></i>
-    <img class="s-image" src="/img/kb.jpg" alt="Keyboard" />
-    <span class="a-size-base-plus a-color-base">Dell</span>
-  </div>
-  <a class="s-pagination-next">Next</a>
-</body></html>`;
-
-const UNAVAILABLE_SEARCH_HTML = `<!DOCTYPE html><html><head><title>Search Results</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-    <a href="/gp/account" data-nav-role="signin">Hello, Test User</a>
-    <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">1</span></a>
-  </nav>
-  <form action="/s" method="get">
-    <input id="twotabsearchtextbox" name="k" type="text" />
-    <button id="nav-search-submit-button" type="submit">Go</button>
-  </form>
-  <div id="s-result-count" data-component-type="s-result-info-bar">1-1 of 1 result</div>
-  <div data-component-type="s-search-result" class="s-result-item">
-    <h2><a href="/dp/UNAVAILABLE" class="a-link-normal"><span>Unavailable Item - Out of Stock</span></a></h2>
-    <span class="a-price"><span class="a-offscreen">$299.99</span><span class="a-price-whole">299</span></span>
-    <i class="a-icon-star a-star-4"><span class="a-icon-alt">4.0 out of 5 stars</span></i>
-    <img class="s-image" src="/img/unavailable.jpg" alt="Unavailable Item" />
-    <span class="a-size-base-plus a-color-base">Brand</span>
-    <span class="a-color-price">Out of Stock</span>
-    <button id="add-to-cart-button" disabled>Add to Cart</button>
-    <button id="notify-me-button">Notify Me</button>
-  </div>
-</body></html>`;
-
-const PRODUCT_HTML = `<!DOCTYPE html><html><head><title>Product</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-    <a href="/gp/account" data-nav-role="signin">Hello, Test User</a>
-    <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">1</span></a>
-    <a href="/gp/flex/sign-out.html">Sign Out</a>
-  </nav>
-  <form action="/s" method="get">
-    <input id="twotabsearchtextbox" name="k" type="text" placeholder="Search Amazon.com" />
-    <button id="nav-search-submit-button" type="submit">Go</button>
-  </form>
-  <div id="dp" id2="ppd">
-    <h1 id="title"><span id="productTitle">Dell Laptop 15-inch</span></h1>
-    <h2><a href="#"><span>Dell Laptop 15-inch</span></a></h2>
-    <span class="a-price"><span class="a-price-whole">799</span></span>
-    <select id="quantity"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option></select>
-    <button id="add-to-cart-button">Add to Cart</button>
-    <div class="a-alert-success" id="huc-v2-order-row-confirm-text">Added to Cart</div>
-    <div class="a-icon-star"></div>
-  </div>
-</body></html>`;
-
-const OUT_OF_STOCK_PRODUCT_HTML = `<!DOCTYPE html><html><head><title>Product</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-    <a href="/gp/account" data-nav-role="signin">Hello, Test User</a>
-    <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">1</span></a>
-  </nav>
-  <div id="dp">
-    <h2><a href="#"><span>Unavailable Item</span></a></h2>
-    <span class="a-color-price">Out of Stock</span>
-    <button id="add-to-cart-button" disabled>Add to Cart</button>
-    <button id="notify-me-button">Notify Me</button>
-  </div>
-</body></html>`;
-
-const CART_HTML = `<!DOCTYPE html><html><head><title>Shopping Cart</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-    <a href="/gp/account" data-nav-role="signin">Hello, Test User</a>
-    <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">1</span></a>
-    <a href="/gp/flex/sign-out.html">Sign Out</a>
-  </nav>
-  <div id="sc-active-cart">
-    <div class="a-box sc-list-item">
-      <span class="sc-product-title">Dell Laptop</span>
-      <select class="sc-action-quantity" name="quantity"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option></select>
-      <input type="text" class="sc-action-quantity" value="1" />
-      <span id="cart-subtotal" class="sc-subtotal"><span class="sc-price">$799.99</span></span>
-      <a class="a-link-normal sc-action-delete" href="/gp/cart/delete">Remove</a>
-      <span class="a-color-success">removed</span>
-    </div>
-    <div class="a-box sc-list-item">
-      <span class="sc-product-title">Logitech Mouse</span>
-      <a class="a-link-normal sc-action-delete" href="/gp/cart/delete">Remove</a>
-    </div>
-    <div id="sc-subtotal-amount-activecart" class="sc-price">$834.98</div>
-    <a href="/gp/checkout/begin" class="a-button-primary sc-proceed-to-checkout">Proceed to checkout</a>
-  </div>
-</body></html>`;
-
-const EMPTY_CART_HTML = `<!DOCTYPE html><html><head><title>Cart</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-    <a href="/gp/account" data-nav-role="signin">Hello, Test User</a>
-    <a id="nav-cart" href="/gp/cart/view.html"><span id="nav-cart-count">0</span></a>
-  </nav>
-  <div class="sc-your-amazon-cart-is-empty">
-    <h2>Your cart is empty</h2>
-    <p>Your cart is empty.</p>
-  </div>
-  <div id="cart-subtotal" class="sc-subtotal"><span class="sc-price">$0.00</span></div>
-  <div id="sc-subtotal-amount-activecart" class="sc-price">$0.00</div>
-</body></html>`;
-
-const CHECKOUT_HTML = `<!DOCTYPE html><html><head><title>Checkout</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-  </nav>
-  <form id="checkout-page" action="/gp/checkout/confirm" method="get">
-    <h3>Shipping Address</h3>
-    <input class="address-select" name="selectedShippingAddressId" type="radio" checked />
-    <div class="displayAddressDiv">123 Main Street, New York, NY 10001</div>
-    <button type="button">Add New Address</button>
-    <div id="address-ui-widgets-entrypoint">
-      <input name="address-line1" type="text" placeholder="Street address" />
-      <input name="city" type="text" placeholder="City" />
-      <input name="state" type="text" placeholder="State" />
-      <input name="zip" type="text" placeholder="ZIP" />
-    </div>
-    <span>Standard (5-7 days)</span>
-    <span>Credit Card</span>
-    <span>Amazon Pay</span>
-    <span>Debit Card</span>
-    <input id="addCreditCardNumber" type="text" placeholder="Card Number" />
-    <select name="expirationMonth" id="expirationDate"><option>12</option></select>
-    <input id="addCreditCardVerificationNumber" type="text" placeholder="CVV" />
-    <input name="promotionCode" id="promotionCode" type="text" />
-    <button type="button">Apply</button>
-    <div class="a-box-group order-summary" id="subtotals-marketplace-table">
-      <span>Order Summary</span>
-      <div class="grand-total-price">$799.99</div>
-      <div id="couponMessage" class="coupon-applied">SAVE10 applied</div>
-      <div class="promotion-price">-$79.99</div>
-    </div>
-    <button id="bottomSubmitOrderButtonId" type="submit">Place your order</button>
-    <button type="button" class="a-button-primary">Save Address</button>
-    <input type="button" id="checkout-continue-btn" class="continue-btn a-button-input" value="Continue" />
-  </form>
-</body></html>`;
-
-const ORDER_CONFIRM_HTML = `<!DOCTYPE html><html><head><title>Order Placed</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-  </nav>
-  <div id="order-summary">
-    <div class="a-alert-heading">Thank you, your order has been placed.</div>
-    <div class="a-success">Order confirmed</div>
-    <div class="a-text-bold">Order #123-4567890-1234567</div>
-    <span id="orderID"><span class="a-size-medium">123-4567890-1234567</span></span>
-    <div class="displayAddressDiv">123 Main Street, New York, NY 10001</div>
-    <span>Amazon Pay</span>
-    <span>Credit Card</span>
-    <span>Debit Card</span>
-  </div>
-</body></html>`;
+// Search, product, cart, checkout and order pages are served by the
+// stateful mock in ./mock-shop.js (see registerShopIntercepts below).
 
 const ACCOUNT_HTML = `<!DOCTYPE html><html><head><title>Account</title></head><body>
   <nav id="navbar">
@@ -398,27 +208,6 @@ const PRIME_HTML = `<!DOCTYPE html><html><head><title>Amazon Prime</title></head
     <select id="cancelReason" name="cancelReason"><option>Too expensive</option></select>
     <button>Confirm Cancellation</button>
     <span>Prime Settings</span>
-  </div>
-</body></html>`;
-
-const HISTORY_HTML = `<!DOCTYPE html><html><head><title>Browsing History</title></head><body>
-  <nav id="navbar">
-    <a id="nav-logo-link" class="nav-logo-link" href="/"><span class="a-icon-logo">amazon</span></a>
-    <a href="/gp/account" data-nav-role="signin">Hello, Test User</a>
-  </nav>
-  <div id="history-page">
-    <h1>Browsing History</h1>
-    <select id="dateFilter" name="dateFilter">
-      <option value="last30">Last 30 days</option>
-      <option value="last90">Last 90 days</option>
-    </select>
-    <a href="/dp/B001" class="rhf-item a-cardui-body history-item">Dell Laptop 15-inch</a>
-    <a href="/dp/B002" class="rhf-item a-cardui-body history-item">Logitech Mouse</a>
-    <button>Clear Browsing History</button>
-    <button>Confirm</button>
-    <span>cleared successfully</span>
-    <span>no items</span>
-    <span>empty</span>
   </div>
 </body></html>`;
 
@@ -605,70 +394,10 @@ beforeEach(() => {
     }
   }).as("registerSubmit");
 
-  // ── Search results ─────────────────────────────────────────────────────
-  cy.intercept("GET", "/s**", (req) => {
-    const params = new URLSearchParams(req.url.split("?")[1] || "");
-    const keyword = (params.get("k") || "").toLowerCase();
-    req.reply({
-      statusCode: 200,
-      headers: { "content-type": "text/html" },
-      body: keyword.includes("unavailable") ? UNAVAILABLE_SEARCH_HTML : SEARCH_HTML,
-    });
-  }).as("searchResults");
-
-  // ── Product detail ─────────────────────────────────────────────────────
-  cy.intercept("GET", "**/dp/**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: PRODUCT_HTML,
-  }).as("productPage");
-
-  // registered AFTER so it takes precedence over the generic dp pattern
-  cy.intercept("GET", "**/dp/UNAVAILABLE**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: OUT_OF_STOCK_PRODUCT_HTML,
-  }).as("outOfStockProduct");
-
-  // ── Cart ───────────────────────────────────────────────────────────────
-  cy.intercept("GET", "**/gp/cart/**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: CART_HTML,
-  }).as("cartPage");
-
-  // ── Cart submit (delete all / clear) ──────────────────────────────────
-  cy.intercept("GET", "**/gp/cart/delete**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: EMPTY_CART_HTML,
-  }).as("emptyCart");
-
-  // ── Checkout ───────────────────────────────────────────────────────────
-  cy.intercept("GET", "**/gp/checkout/**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: CHECKOUT_HTML,
-  }).as("checkoutPage");
-
-  cy.intercept("GET", "**/gp/buy/**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: CHECKOUT_HTML,
-  }).as("buyPage");
-
-  // ── Order confirm ──────────────────────────────────────────────────────
-  cy.intercept("GET", "**/gp/checkout/confirm**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: ORDER_CONFIRM_HTML,
-  }).as("orderConfirm");
-
-  cy.intercept("GET", "**/gp/checkout/thankyou**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: ORDER_CONFIRM_HTML,
-  }).as("orderThankyou");
+  // ── Shopping pages: stateful mock (search / product / cart / checkout) ──
+  resetShop();
+  registerShopIntercepts();
+  registerAccountIntercepts();
 
   // ── Sign out ───────────────────────────────────────────────────────────
   cy.intercept("GET", "**/gp/flex/sign-out.html**", {
@@ -695,17 +424,7 @@ beforeEach(() => {
   }).as("yourstore");
 
   // ── Orders / returns ───────────────────────────────────────────────────
-  cy.intercept("GET", "**/gp/css/order-history**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: ORDERS_HTML,
-  }).as("orderHistory");
 
-  cy.intercept("GET", "**/order-history**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: ORDERS_HTML,
-  }).as("orderHistoryAlt");
 
   cy.intercept("GET", "**/gp/return**", {
     statusCode: 200,
@@ -714,11 +433,6 @@ beforeEach(() => {
   }).as("returnPage");
 
   // ── Browsing history ───────────────────────────────────────────────────
-  cy.intercept("GET", "**/gp/history/**", {
-    statusCode: 200,
-    headers: { "content-type": "text/html" },
-    body: HISTORY_HTML,
-  }).as("historyPage");
 
   // ── Prime ──────────────────────────────────────────────────────────────
   cy.intercept("GET", "**/gp/prime**", {
