@@ -70,7 +70,10 @@ jobs:
               let p = 0, x = 0;
               for (const sc of ft.elements || []) {
                 const st = sc.steps.map(s => s.result.status);
-                st.every(s => s === "passed") ? p++ : x++;
+                if (st.every(s => s === "passed")) { p++; continue; }
+                x++;
+                const bad = sc.steps.find(s => s.result.status !== "passed");
+                console.log(`FAILED: ${sc.name} -> ${bad.keyword}${bad.name}\n  ${(bad.result.error_message || bad.result.status).split("\n").slice(0, 3).join("\n  ")}`);
               }
               P += p; F += x; rows.push(`| ${ft.name} | ${p + x} | ${p} | ${x} |`);
             }

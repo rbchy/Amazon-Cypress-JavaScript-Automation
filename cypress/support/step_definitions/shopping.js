@@ -77,7 +77,7 @@ Then("I should see product images", () => {
 // ─── Filters ─────────────────────────────────────────────────────────────────
 
 Then("I should see search results", () => {
-  cy.get(RESULT).its("length").should("be.greaterThan", 0).as("unfilteredCount");
+  cy.get(RESULT).its("length").should("be.greaterThan", 0).as("unfilteredCount", { type: "static" });
 });
 
 When("I apply filter {string}", (filter) => {
@@ -129,7 +129,7 @@ Then("I should see sort dropdown", () => {
 When("I select sort option {string}", (sortOption) => {
   cy.get(selectors.sort_dropdown).select(sortOption);
   // the page reloads with ?s=<value>; wait until the new page shows the choice
-  cy.get(`${selectors.sort_dropdown} option:selected`).should("have.text", sortOption);
+  cy.get("#s-result-sort-select").find("option:selected").should("have.text", sortOption);
 });
 
 const expectSorted = (values, compare, label) => {
@@ -153,7 +153,14 @@ Then("results should show newest products first", () => {
 // ─── Add to cart ─────────────────────────────────────────────────────────────
 
 When("I search for product {string}", (productName) => {
-  searchFor(productName);
+  // the same step is used on the Associates dashboard, which has its own product search
+  cy.get("body").then(($b) => {
+    if ($b.find(selectors.affiliate_search_box).length) {
+      cy.get(selectors.affiliate_search_box).first().clear().type(productName);
+    } else {
+      searchFor(productName);
+    }
+  });
 });
 
 When("I click on first product result", () => {
@@ -171,7 +178,7 @@ When("I enter quantity {string}", (qty) => {
 });
 
 When("I click Add to Cart button", () => {
-  navCount().as("countBefore");
+  navCount().as("countBefore", { type: "static" });
   cy.get(selectors.add_to_cart_button).should("be.enabled").click();
   cy.get(selectors.toast_message).should("contain", "Added to Cart");
 });
@@ -252,7 +259,7 @@ Then("I should see cart subtotal", () => {
 });
 
 When("I click Remove button for {string}", (product) => {
-  navCount().as("countBefore");
+  navCount().as("countBefore", { type: "static" });
   cy.wrap(product).as("removedProduct");
   cy.contains(".sc-list-item", product, { matchCase: false }).find(".sc-action-delete").click();
 });
@@ -265,7 +272,10 @@ Then("I should see confirmation message", () => {
 
 Then("Product should be removed from cart", () => {
   cy.get("@removedProduct").then((p) =>
-    cy.get("body").find(".sc-product-title").filter(`:contains("${p}")`).should("have.length", 0)
+    cy.get("body").should(($b) => {
+      const titles = [...$b.find(".sc-product-title")].map((t) => t.textContent);
+      expect(titles.filter((t) => t.includes(p)), `"${p}" still in cart`).to.have.length(0);
+    })
   );
 });
 

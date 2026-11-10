@@ -55,7 +55,7 @@ When("I review order summary", () => {
 });
 
 When("I click Place Order button", () => {
-  cy.get(".grand-total-price").invoke("text").as("checkoutTotal");
+  cy.get(".grand-total-price").invoke("text").as("checkoutTotal", { type: "static" });
   cy.get(selectors.place_order_button).click();
 });
 
@@ -127,7 +127,7 @@ When("I enter coupon code {string}", (couponCode) => {
 });
 
 When("I click Apply Coupon", () => {
-  cy.get(".grand-total-price").invoke("attr", "data-amount").then(Number).as("totalBefore");
+  cy.get(".grand-total-price").invoke("attr", "data-amount").then(Number).as("totalBefore", { type: "static" });
   cy.contains("button", "Apply").click();
 });
 
@@ -401,7 +401,7 @@ Then("Products should be listed with most recent first", () => {
 });
 
 When("I click on any product", () => {
-  cy.get(selectors.browsing_history_items).first().invoke("attr", "href").as("historyHref");
+  cy.get(selectors.browsing_history_items).first().invoke("attr", "href").as("historyHref", { type: "static" });
   cy.get(selectors.browsing_history_items).first().click();
 });
 
@@ -428,8 +428,8 @@ Then("Browsing history should be empty", () => {
 });
 
 const pickDateFilter = (label) => {
-  cy.get(selectors.history_date_filter).select(label);
-  cy.get(`${selectors.history_date_filter} option:selected`).should("have.text", label);
+  cy.get("#dateFilter").select(label);
+  cy.get("#dateFilter").find("option:selected").should("have.text", label);
 };
 
 /** Every visible row is within the limit, and at least one older row got hidden. */
