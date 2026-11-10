@@ -50,8 +50,8 @@ export function createShop() {
       const p = shop.product(asin);
       if (!p || p.outOfStock) return false;
       const line = shop.cart.find((l) => l.asin === asin);
-      if (line) line.qty += qty;
-      else shop.cart.push({ asin, qty });
+      if (line) line.qty += 1;
+      else shop.cart.push({ asin, qty: 1 }); // MUTATION: quantity ignored
       return true;
     },
     setQty(asin, qty) {
@@ -100,7 +100,7 @@ export function searchCatalog(keyword, opts = {}) {
   if (opts.brand) hits = hits.filter((p) => p.brand.toLowerCase() === opts.brand.toLowerCase());
   if (opts.minRating != null) hits = hits.filter((p) => p.rating >= opts.minRating);
   const sorted = [...hits];
-  if (opts.sort === "price-asc-rank") sorted.sort((a, b) => a.price - b.price);
+  // MUTATION: price sort removed
   if (opts.sort === "price-desc-rank") sorted.sort((a, b) => b.price - a.price);
   if (opts.sort === "review-rank") sorted.sort((a, b) => b.rating - a.rating);
   if (opts.sort === "date-desc-rank") sorted.sort((a, b) => b.released.localeCompare(a.released));
@@ -377,7 +377,7 @@ export function renderCheckout() {
         var code = $("#promotionCode").value.trim().toUpperCase();
         var rate = COUPONS[code];
         if (!rate) { $("#couponMessage").textContent = "The promotional code you entered is not valid."; return; }
-        var discount = Math.round(items * rate * 100) / 100;
+        var discount = 0; // MUTATION: coupon gives no discount
         $("#discount-line").dataset.amount = discount;
         $("#discount-line").textContent = "Promotion applied: -" + fmt(discount);
         $("#discount-line").style.display = "block";
