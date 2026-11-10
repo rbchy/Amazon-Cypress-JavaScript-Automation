@@ -1,0 +1,50 @@
+{
+  "user": {
+    "name": "Test User",
+    "email": "testuser@qabrains.io",
+    "password": "TestPassword@123"
+  },
+  "newUser": {
+    "name": "New Test User",
+    "email": "newtestuser@qabrains.io",
+    "password": "NewPassword@123"
+  },
+  "address": {
+    "street": "123 Main Street",
+    "city": "New York",
+    "state": "NY",
+    "zipCode": "10001",
+    "country": "United States"
+  },
+  "payment": {
+    "cardNumber": "4532123456789010",
+    "expiryMonth": "12",
+    "expiryYear": "2027",
+    "expiry": "12/27",
+    "cvv": "123",
+    "cardholderName": "Test User"
+  },
+  "products": {
+    "laptop": { "name": "Dell XPS 13 Laptop", "price": 999.99 },
+    "mouse": { "name": "Logitech M705 Mouse", "price": 34.99 },
+    "keyboard": { "name": "Mechanical Keyboard RGB", "price": 79.99 }
+  },
+  "orders": {
+    "orderNumber": "123-4567890-1234567",
+    "status": "Delivered",
+    "total": 1114.97
+  },
+  "coupons": {
+    "code": "SAVE10",
+    "discount": 10
+  },
+  "prime": {
+    "membership": "Prime Member",
+    "freeShipping": true
+  },
+  "affiliate": {
+    "website": "myblog.com",
+    "traffic": "1000",
+    "contentType": "Blog"
+  }
+}

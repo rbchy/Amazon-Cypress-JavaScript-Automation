@@ -1,0 +1,67 @@
+{
+  "name": "amazon-automation-cypress",
+  "version": "1.0.0",
+  "description": "Amazon e-commerce test automation using Cypress, JavaScript, and Cucumber BDD",
+  "author": "RB Chowdhury (@rbchy)",
+  "license": "MIT",
+  "keywords": [
+    "cypress",
+    "automation",
+    "bdd",
+    "cucumber",
+    "testing",
+    "amazon",
+    "e-commerce"
+  ],
+  "scripts": {
+    "open": "cypress open",
+    "test": "cypress run",
+    "test:chrome": "cypress run --browser chrome",
+    "test:firefox": "cypress run --browser firefox",
+    "test:edge": "cypress run --browser edge",
+    "test:headless": "cypress run --headless",
+    "test:feature": "cypress run --spec \"cypress/features/**/*.feature\"",
+    "test:single": "cypress run --spec \"cypress/features/01-authentication.feature\"",
+    "test:shopping": "cypress run --spec \"cypress/features/02-shopping.feature\"",
+    "test:account": "cypress run --spec \"cypress/features/03-account-management.feature\"",
+    "test:report": "cypress run && npx mochawesome-merge cypress/results/mochawesome*.json -o cypress/results/report.json && npx marge cypress/results/report.json -o cypress/results",
+    "test:cucumber-report": "cypress run && node scripts/generate-report.js",
+    "test:debug": "cypress run --headed --no-exit",
+    "test:ci": "cypress run --headless --browser chrome",
+    "lint": "eslint cypress/support/step_definitions/*.js",
+    "format": "prettier --write \"cypress/**/*.js\"",
+    "clean": "rm -rf cypress/results cypress/screenshots cypress/videos node_modules",
+    "setup": "npm install && echo '✅ Setup complete!'"
+  },
+  "cypress-cucumber-preprocessor": {
+    "json": {
+      "enabled": true,
+      "output": "cypress/results/cucumber-json/cucumber-report.json"
+    },
+    "html": {
+      "enabled": true,
+      "output": "cypress/results/cucumber-report.html"
+    }
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^24.0.1",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
+    "cypress": "^14.0.0",
+    "esbuild": "^0.21.5",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-cypress": "^3.3.0",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0",
+    "multiple-cucumber-html-reporter": "^3.10.0",
+    "prettier": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
